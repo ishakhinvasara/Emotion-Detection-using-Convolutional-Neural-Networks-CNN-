@@ -1,0 +1,57 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+
+import seaborn as sns
+# Load the dataset
+df = pd.read_csv('/content/music dataset (1).csv')
+# Encode categorical variables
+le_gender = LabelEncoder()
+df['gender'] = le_gender.fit_transform(df['gender'])
+le_emotion = LabelEncoder()
+df['emotion'] = le_emotion.fit_transform(df['emotion'])
+le_genre = LabelEncoder()
+df['preferred_genre'] = le_genre.fit_transform(df['preferred_genre'])
+le_url = LabelEncoder()
+df['url'] = le_url.fit_transform(df['url'])
+# Define features and target
+X = df[['age', 'gender', 'emotion', 'preferred_genre']]
+y = df['url']
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=42)
+# Initialize and train the classifier
+classifier = LogisticRegression(max_iter=1000)
+classifier.fit(X_train, y_train)
+# Predict on the test set
+y_pred = classifier.predict(X_test)
+# Performance metrics
+print(classification_report(y_test, y_pred))
+cm = confusion_matrix(y_test, y_pred)
+# Visualization of the confusion matrix
+plt.figure(figsize=(10,7))
+sns.heatmap(cm, annot=True)
+plt.xlabel('Predicted')
+plt.ylabel('Truth')
+plt.show()
+# Function to predict URL based on user input
+def predict_url(age, gender, emotion, genre):
+gender_encoded = le_gender.transform([gender])[0]
+emotion_encoded = le_emotion.transform([emotion])[0]
+genre_encoded = le_genre.transform([genre])[0]
+prediction = classifier.predict([[age, gender_encoded,
+emotion_encoded, genre_encoded]])
+predicted_url_index = prediction[0]
+return le_url.inverse_transform([predicted_url_index])[0]
+
+# Example usage
+age = int(input("Enter your age: "))
+gender = input("Enter your gender (Male/Female): ")
+emotion = emotiondetected
+genre = input("Enter your preferred genre (Bollywood/Hindustani
+Classical/etc.): ")
+suggested_url = predict_url(age, gender, emotion, genre)
+print("Based on your input, we suggest this track: ", suggested_url)
